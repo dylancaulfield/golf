@@ -31,6 +31,32 @@ func PlayersHandler(w http.ResponseWriter, r *http.Request){
 
 }
 
+func GetPlayerHandler(w http.ResponseWriter, r *http.Request){
+
+	vars := mux.Vars(r)
+
+	player, err := models.GetPlayer(vars["id"])
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+
+		fmt.Println(err)
+
+		return
+	}
+
+	js, err := json.Marshal(player)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(js)
+
+}
+
 func NewPlayerHandler(w http.ResponseWriter, r *http.Request){
 
 	var p models.Player

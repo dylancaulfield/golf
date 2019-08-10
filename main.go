@@ -27,7 +27,8 @@ func main() {
 	players := router.PathPrefix("/players").Subrouter()
 	players.HandleFunc("", handlers.PlayersHandler).Methods(http.MethodGet)
 	players.HandleFunc("", handlers.NewPlayerHandler).Methods(http.MethodPost)
-	players.HandleFunc(`/{id:\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b}`, handlers.PlayerResultsHandler).Methods(http.MethodGet)
+	players.HandleFunc(`/{id:\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b}/results`, handlers.PlayerResultsHandler).Methods(http.MethodGet)
+	players.HandleFunc(`/{id:\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b}`, handlers.GetPlayerHandler).Methods(http.MethodGet)
 
 	scores := router.PathPrefix("/scores").Subrouter()
 	scores.HandleFunc(`/{id:\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b}`, handlers.ScoresHandler).Methods(http.MethodGet)
