@@ -11,7 +11,6 @@ type Player struct {
 }
 
 type PlayerResult struct {
-	Name   string `json:"name"`
 	Score  int    `json:"score"`
 	Course string `json:"course"`
 	Par    int    `json:"par"`
@@ -56,8 +55,9 @@ func GetPlayers() ([]Player, error) {
 
 func GetPlayerResults(id string) ([]PlayerResult, error) {
 
+	//Maybe remove name field, pointless??
 
-	results, err := getDatabase().Query("SELECT players.name, scores.score, courses.name, courses.par FROM players, scores, courses, results WHERE scores.player=players.id AND scores.result=results.id AND results.course=courses.id AND players.id=?;", id)
+	results, err := getDatabase().Query("SELECT scores.score, courses.name, courses.par FROM players, scores, courses, results WHERE scores.player=players.id AND scores.result=results.id AND results.course=courses.id AND players.id=?;", id)
 	if err != nil {
 
 		fmt.Println(err)
@@ -70,7 +70,7 @@ func GetPlayerResults(id string) ([]PlayerResult, error) {
 	for results.Next() {
 		var playerResult PlayerResult
 
-		err = results.Scan(&playerResult.Name, &playerResult.Score, &playerResult.Course, &playerResult.Par)
+		err = results.Scan(&playerResult.Score, &playerResult.Course, &playerResult.Par)
 		if err != nil {
 			return []PlayerResult{}, err
 		}
