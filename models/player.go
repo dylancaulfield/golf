@@ -11,11 +11,11 @@ type Player struct {
 }
 
 type PlayerResult struct {
+	Date   string `json:"date"`
 	Score  int    `json:"score"`
 	Course string `json:"course"`
 	Par    int    `json:"par"`
 }
-
 
 func NewPlayer(player Player) error {
 
@@ -54,7 +54,7 @@ func GetPlayers() ([]Player, error) {
 
 }
 
-func GetPlayer(id string) (Player, error){
+func GetPlayer(id string) (Player, error) {
 
 	var p Player
 
@@ -67,12 +67,11 @@ func GetPlayer(id string) (Player, error){
 
 	return p, nil
 
-
 }
 
 func GetPlayerResults(id string) ([]PlayerResult, error) {
 
-	results, err := getDatabase().Query("SELECT scores.score, courses.name, courses.par FROM players, scores, courses, results WHERE scores.player=players.id AND scores.result=results.id AND results.course=courses.id AND players.id=?;", id)
+	results, err := getDatabase().Query("SELECT results.date, scores.score, courses.name, courses.par FROM players, scores, courses, results WHERE scores.player=players.id AND scores.result=results.id AND results.course=courses.id AND players.id=?;", id)
 	if err != nil {
 
 		fmt.Println(err)
@@ -85,7 +84,7 @@ func GetPlayerResults(id string) ([]PlayerResult, error) {
 	for results.Next() {
 		var playerResult PlayerResult
 
-		err = results.Scan(&playerResult.Score, &playerResult.Course, &playerResult.Par)
+		err = results.Scan(&playerResult.Date, &playerResult.Score, &playerResult.Course, &playerResult.Par)
 		if err != nil {
 			return []PlayerResult{}, err
 		}
