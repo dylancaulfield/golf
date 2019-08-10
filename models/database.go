@@ -9,7 +9,7 @@ func getDatabase() *sql.DB {
 
 	if instance == nil {
 
-		db, err := sql.Open("mysql", "root:golf@/golf?parseTime=true")
+		db, err := sql.Open("mysql", "golang:golf@/golf?parseTime=true")
 		if err != nil {
 			panic(err)
 		}

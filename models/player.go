@@ -1,10 +1,20 @@
 package models
 
-import "github.com/google/uuid"
+import (
+	"fmt"
+	"github.com/google/uuid"
+)
 
 type Player struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
+}
+
+type PlayerResult struct {
+	Name   string `json:"name"`
+	Score  int    `json:"score"`
+	Course string `json:"course"`
+	Par    int    `json:"par"`
 }
 
 func NewPlayer(player Player) error {
@@ -41,5 +51,34 @@ func GetPlayers() ([]Player, error) {
 	}
 
 	return players, nil
+
+}
+
+func GetPlayerResults(id string) ([]PlayerResult, error) {
+
+
+	results, err := getDatabase().Query("SELECT players.name, scores.score, courses.name, courses.par FROM players, scores, courses, results WHERE scores.player=players.id AND scores.result=results.id AND results.course=courses.id AND players.id=?;", id)
+	if err != nil {
+
+		fmt.Println(err)
+
+		return []PlayerResult{}, err
+	}
+
+	var playersResults []PlayerResult
+
+	for results.Next() {
+		var playerResult PlayerResult
+
+		err = results.Scan(&playerResult.Name, &playerResult.Score, &playerResult.Course, &playerResult.Par)
+		if err != nil {
+			return []PlayerResult{}, err
+		}
+
+		playersResults = append(playersResults, playerResult)
+
+	}
+
+	return playersResults, nil
 
 }
