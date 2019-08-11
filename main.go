@@ -16,6 +16,7 @@ func main() {
 
 	courses := router.PathPrefix("/courses").Subrouter()
 	courses.HandleFunc("", handlers.CoursesHandler).Methods(http.MethodGet)
+	courses.HandleFunc(`/{id:\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b}`, handlers.GetCourseHandler).Methods(http.MethodGet)
 	courses.HandleFunc("", handlers.NewCourseHandler).Methods(http.MethodPost)
 	courses.HandleFunc("", handlers.UpdateCourseHandler).Methods(http.MethodPatch)
 	courses.HandleFunc(`/{id:\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b}`, handlers.DeleteCourseHandler).Methods(http.MethodDelete)

@@ -11,6 +11,18 @@ type Course struct {
 	Par  int    `json:"par"`
 }
 
+type courseWithResults struct {
+	Id      string   `json:"id"`
+	Name    string   `json:"name"`
+	Par     int      `json:"par"`
+	Results []result `json:"results"`
+}
+
+type result struct {
+	Id   string `json:"id"`
+	Date string `json:"date"`
+}
+
 func GetCourses() ([]Course, error) {
 
 	results, err := getDatabase().Query("SELECT * FROM courses")
@@ -35,6 +47,40 @@ func GetCourses() ([]Course, error) {
 	}
 
 	return courses, nil
+
+}
+
+func GetCourse(id string) (courseWithResults, error) {
+
+	var c courseWithResults
+	var rs []result
+
+	// Get Course
+	err := getDatabase().QueryRow("SELECT courses.id, courses.name, courses.par FROM courses WHERE courses.id=?;", id).Scan(&c.Id, &c.Name, &c.Par)
+	if err != nil {
+		return courseWithResults{}, err
+	}
+
+	// Get Results Associated With it
+	results, err := getDatabase().Query("SELECT results.id, results.date FROM results WHERE results.course=?;", id)
+	if err != nil {
+		return courseWithResults{}, err
+	}
+
+	for results.Next() {
+		var r result
+
+		err = results.Scan(&r.Id, &r.Date)
+		if err != nil {
+			return courseWithResults{}, err
+		}
+
+		rs = append(rs, r)
+	}
+
+	c.Results = rs
+
+	return c, nil
 
 }
 

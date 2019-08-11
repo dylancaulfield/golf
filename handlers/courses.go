@@ -72,6 +72,30 @@ func CoursesHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func GetCourseHandler(w http.ResponseWriter, r *http.Request){
+
+	vars := mux.Vars(r)
+
+	course, err := models.GetCourse(vars["id"])
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+
+		return
+	}
+
+	js, err := json.Marshal(course)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(js)
+
+}
+
 func UpdateCourseHandler(w http.ResponseWriter, r *http.Request) {
 
 	var c models.Course

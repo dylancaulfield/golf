@@ -11,6 +11,12 @@ type JsonResult struct {
 	Scores []Score `json:"scores"`
 }
 
+type Score struct {
+	Player string `json:"player"`
+	Score int `json:"score"`
+	Result string `json:"result"`
+}
+
 type Result struct {
 	Id     string `json:"id"`
 	Course string `json:"course"`
