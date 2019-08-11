@@ -17,6 +17,20 @@ type Result struct {
 	Date   string `json:"date"`
 }
 
+type resultWithAllInfo struct {
+	Id     string  `json:"id"`
+	Date   string  `json:"date"`
+	Course string  `json:"course"`
+	Par    int     `json:"par"`
+	Scores []playerScore `json:"scores"`
+}
+
+type playerScore struct {
+	PlayerId string `json:"player_id"`
+	PlayerName string `json:"player_name"`
+	Score int `json:"score"`
+}
+
 func CreateResult(result JsonResult) error {
 
 	tx, err := getDatabase().Begin()
@@ -77,6 +91,41 @@ func GetResults() ([]Result, error) {
 	}
 
 	return results, nil
+
+}
+
+func GetResult(id string) (resultWithAllInfo, error) {
+
+	var r resultWithAllInfo
+	var scores []playerScore
+
+
+	// Scores and Their Players
+	results, err := getDatabase().Query("SELECT DISTINCT players.id, players.name, scores.score FROM players, scores, results WHERE scores.player=players.id AND scores.result=?;", id)
+	if err != nil {
+		return resultWithAllInfo{}, err
+	}
+
+	for results.Next() {
+		var s playerScore
+
+		err = results.Scan(&s.PlayerId, &s.PlayerName, &s.Score)
+		if err != nil {
+			return resultWithAllInfo{}, err
+		}
+
+		scores = append(scores, s)
+	}
+
+	r.Scores = scores
+
+	// Result and Course
+	err = getDatabase().QueryRow("SELECT results.id, results.date, courses.name AS course, courses.par FROM results, courses WHERE results.course=courses.id AND results.id=?;", id).Scan(&r.Id, &r.Date, &r.Course, &r.Par)
+	if err != nil {
+		return resultWithAllInfo{}, err
+	}
+
+	return r, nil
 
 }
 

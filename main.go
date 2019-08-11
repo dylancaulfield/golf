@@ -23,6 +23,7 @@ func main() {
 	results := router.PathPrefix("/results").Subrouter()
 	results.HandleFunc("", handlers.ResultsHandler).Methods(http.MethodGet)
 	results.HandleFunc("", handlers.NewResultHandler).Methods(http.MethodPost)
+	results.HandleFunc(`/{id:\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b}`, handlers.GetResultHandler).Methods(http.MethodGet)
 
 	players := router.PathPrefix("/players").Subrouter()
 	players.HandleFunc("", handlers.PlayersHandler).Methods(http.MethodGet)
