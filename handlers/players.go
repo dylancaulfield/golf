@@ -91,29 +91,3 @@ func NewPlayerHandler(w http.ResponseWriter, r *http.Request){
 	_, _ = w.Write([]byte(http.StatusText(http.StatusOK)))
 
 }
-
-func PlayerResultsHandler(w http.ResponseWriter, r *http.Request){
-
-	vars := mux.Vars(r)
-
-	results, err := models.GetPlayerResults(vars["id"])
-	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-
-		return
-	}
-
-
-
-	js, err := json.Marshal(results)
-	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write(js)
-
-}

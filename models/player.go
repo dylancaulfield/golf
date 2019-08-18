@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"github.com/google/uuid"
 )
 
@@ -15,6 +14,21 @@ type PlayerResult struct {
 	Score  int    `json:"score"`
 	Course string `json:"course"`
 	Par    int    `json:"par"`
+}
+
+type PlayerData struct {
+	Id string `json:"id"`
+	Name string `json:"name"`
+	Results []playerResult `json:"results"`
+}
+
+type playerResult struct {
+	ResultId string `json:"result_id"`
+	Date string `json:"date"`
+	CourseId string `json:"course_id"`
+	CourseName string `json:"course_name"`
+	Par int `json:"par"`
+	Score int `json:"score"`
 }
 
 func NewPlayer(player Player) error {
@@ -54,45 +68,43 @@ func GetPlayers() ([]Player, error) {
 
 }
 
-func GetPlayer(id string) (Player, error) {
+func GetPlayer(id string) (PlayerData, error) {
 
-	var p Player
+	var p PlayerData
 
-	result := getDatabase().QueryRow("SELECT players.id, players.name FROM players WHERE players.id=?", id)
-
-	err := result.Scan(&p.Id, &p.Name)
+	// Get Player
+	err := getDatabase().QueryRow("SELECT players.id, players.name FROM players WHERE players.id=?", id).Scan(&p.Id, &p.Name)
 	if err != nil {
-		return Player{}, err
+		return PlayerData{}, err
+	}
+
+	// Get PlayerResults
+	results, err := getDatabase().Query("SELECT results.id AS result_id, results.date, courses.id AS course_id, courses.name AS course_name, courses.par, scores.score FROM courses, players, results, scores WHERE scores.player=players.id AND scores.result=results.id AND results.course=courses.id AND players.id=?;", id)
+	if err != nil {
+		return PlayerData{}, err
+	}
+
+	for results.Next() {
+		var pR playerResult
+
+		err = results.Scan(&pR.ResultId, &pR.Date, &pR.CourseId, &pR.CourseName, &pR.Par, &pR.Score)
+		if err != nil {
+			return PlayerData{}, err
+		}
+
+		p.Results = append(p.Results, pR)
 	}
 
 	return p, nil
 
 }
 
-func GetPlayerResults(id string) ([]PlayerResult, error) {
 
-	results, err := getDatabase().Query("SELECT results.date, scores.score, courses.name, courses.par FROM players, scores, courses, results WHERE scores.player=players.id AND scores.result=results.id AND results.course=courses.id AND players.id=?;", id)
-	if err != nil {
 
-		fmt.Println(err)
 
-		return []PlayerResult{}, err
-	}
 
-	var playersResults []PlayerResult
 
-	for results.Next() {
-		var playerResult PlayerResult
 
-		err = results.Scan(&playerResult.Date, &playerResult.Score, &playerResult.Course, &playerResult.Par)
-		if err != nil {
-			return []PlayerResult{}, err
-		}
 
-		playersResults = append(playersResults, playerResult)
 
-	}
 
-	return playersResults, nil
-
-}

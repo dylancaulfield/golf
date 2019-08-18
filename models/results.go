@@ -13,7 +13,7 @@ type JsonResult struct {
 
 type Score struct {
 	Player string `json:"player"`
-	Score int `json:"score"`
+	Score  int    `json:"score"`
 	Result string `json:"result"`
 }
 
@@ -24,17 +24,18 @@ type Result struct {
 }
 
 type resultWithAllInfo struct {
-	Id     string  `json:"id"`
-	Date   string  `json:"date"`
-	Course string  `json:"course"`
-	Par    int     `json:"par"`
-	Scores []playerScore `json:"scores"`
+	ResultId   string        `json:"result_id"`
+	Date       string        `json:"date"`
+	CourseId   string        `json:"course_id"`
+	CourseName string        `json:"course_name"`
+	Par        int           `json:"par"`
+	Scores     []playerScore `json:"scores"`
 }
 
 type playerScore struct {
-	PlayerId string `json:"player_id"`
+	PlayerId   string `json:"player_id"`
 	PlayerName string `json:"player_name"`
-	Score int `json:"score"`
+	Score      int    `json:"score"`
 }
 
 func CreateResult(result JsonResult) error {
@@ -78,7 +79,7 @@ func CreateResult(result JsonResult) error {
 
 func GetResults() ([]Result, error) {
 
-	dbResults, err := getDatabase().Query("SELECT results.id, courses.name, results.date FROM results, courses WHERE courses.id=results.course;")
+	dbResults, err := getDatabase().Query("SELECT results.id, courses.name, results.date FROM results, courses WHERE courses.id=results.course ORDER BY results.date DESC;")
 	if err != nil {
 		return []Result{}, err
 	}
@@ -105,7 +106,6 @@ func GetResult(id string) (resultWithAllInfo, error) {
 	var r resultWithAllInfo
 	var scores []playerScore
 
-
 	// Scores and Their Players
 	results, err := getDatabase().Query("SELECT DISTINCT players.id, players.name, scores.score FROM players, scores, results WHERE scores.player=players.id AND scores.result=?;", id)
 	if err != nil {
@@ -126,7 +126,7 @@ func GetResult(id string) (resultWithAllInfo, error) {
 	r.Scores = scores
 
 	// Result and Course
-	err = getDatabase().QueryRow("SELECT results.id, results.date, courses.name AS course, courses.par FROM results, courses WHERE results.course=courses.id AND results.id=?;", id).Scan(&r.Id, &r.Date, &r.Course, &r.Par)
+	err = getDatabase().QueryRow("SELECT results.id, results.date, courses.name AS course_name, courses.id AS course_id, courses.par FROM results, courses WHERE results.course=courses.id AND results.id=?;", id).Scan(&r.ResultId, &r.Date, &r.CourseName, &r.CourseId, &r.Par)
 	if err != nil {
 		return resultWithAllInfo{}, err
 	}

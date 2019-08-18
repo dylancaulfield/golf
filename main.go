@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"github.com/dyldawg/golf/handlers"
+	gorillaHandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -29,13 +29,9 @@ func main() {
 	players := router.PathPrefix("/players").Subrouter()
 	players.HandleFunc("", handlers.PlayersHandler).Methods(http.MethodGet)
 	players.HandleFunc("", handlers.NewPlayerHandler).Methods(http.MethodPost)
-	players.HandleFunc(`/{id:\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b}/results`, handlers.PlayerResultsHandler).Methods(http.MethodGet)
 	players.HandleFunc(`/{id:\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b}`, handlers.GetPlayerHandler).Methods(http.MethodGet)
 
-	err := http.ListenAndServe(":3000", router)
-	if err != nil {
-		fmt.Println(err)
-	}
+	log.Fatal(http.ListenAndServe(":3000", gorillaHandlers.CORS(gorillaHandlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}), gorillaHandlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"}), gorillaHandlers.AllowedOrigins([]string{"*"}))(router)))
 
 }
 
@@ -47,3 +43,4 @@ func logRequests(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
