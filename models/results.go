@@ -79,7 +79,7 @@ func CreateResult(result JsonResult) error {
 
 func GetResults() ([]Result, error) {
 
-	dbResults, err := getDatabase().Query("SELECT results.id, courses.name, results.date FROM results, courses WHERE courses.id=results.course ORDER BY results.date ASC;")
+	dbResults, err := getDatabase().Query("SELECT results.id, courses.name, results.date FROM results, courses WHERE courses.id=results.course ORDER BY results.date DESC;")
 	if err != nil {
 		return []Result{}, err
 	}
